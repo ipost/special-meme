@@ -55,6 +55,7 @@
             $scope.credentialsList = data;
             $scope.canonicalData = angular.copy($scope.credentialsList);
           });
+          //todo: handle failure
         };
 
         $scope.create = function () {
@@ -65,6 +66,7 @@
             $scope.credentialsList = angular.copy(data);
             $scope.canonicalData = angular.copy(data);
           });
+          //todo: handle failure
         };
 
         $scope.addNew = function () {
@@ -95,7 +97,6 @@
             if (angular.equals(newVal[i], $scope.canonicalData[i])) {
               $scope.form['form_'+i].$setPristine();
             } else {
-              //console.log(i);
               $scope.unsavedChanges = true;
             }
           }
@@ -116,7 +117,6 @@
         };
 
         $scope.remove = function(index) {
-          //$scope.credentialsList = $scope.credentialsList.slice(0, index).concat($scope.credentialsList.slice(index + 1, $scope.credentialsList.length));
           $scope.credentialsList[index].removed = true;
         };
       });
