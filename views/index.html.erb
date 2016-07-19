@@ -45,8 +45,6 @@
       app.controller('PwCtrl', function($scope, $http) {
         $scope.unsavedChanges = false;
         $scope.loadData = function () {
-          $scope.password = 'pass';
-          $scope.id = 'filename';
           $http.post('/pw/open', {
             password: $scope.password,
             id: $scope.id
