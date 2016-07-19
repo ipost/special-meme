@@ -8,6 +8,7 @@
   </head>
   <body ng-controller="PwCtrl">
     <div id="title">Header</div>
+    <label>Filter: <input type="text" name="filter" ng-model="filter" placeholder="filter..."></label>
     <div ng-class="credentialsList ? '' : 'hide'" id="credentials">
       <div id="column-headers">
         <div>Identity</div>
@@ -15,7 +16,7 @@
         <div>Note</div>
       </div>
       <form name="form" id="credentials-list">
-        <div ng-form="form_{{$index}}" class="credential-set" ng-repeat="creds in credentialsList">
+        <div ng-show="shouldShow(creds)" ng-form="form_{{$index}}" class="credential-set" ng-repeat="creds in credentialsList">
           <div ng-class="creds.removed ? 'removed' : ''"></div>
           <input type="text" class="identity-field data-field" name="identity_{{$index}}" ng-model="creds.identity">
           <input type="text" class="secret-field data-field" name="secret_{{$index}}" ng-model="creds.secret">
@@ -82,7 +83,8 @@
             data: $scope.credentialsList.filter(function(cred) { return !cred.removed })
           }).success(function(data) {
             $scope.saving = false;
-            $scope.canonicalData = angular.copy($scope.credentialsList);
+            $scope.credentialsList = angular.copy(data);
+            $scope.canonicalData = angular.copy(data);
             $scope.form.$setPristine();
             $scope.unsavedChanges = false;
           });
@@ -103,6 +105,15 @@
           if (!$scope.unsavedChanges) $scope.form.$setPristine();
         }, true);
 
+        $scope.shouldShow = function(creds) {
+          if ($scope.filter && $scope.filter.length > 0) {
+            return creds.identity.toLowerCase().indexOf($scope.filter.toLowerCase()) >= 0 ||
+              creds.note.toLowerCase().indexOf($scope.filter.toLowerCase()) >= 0;
+          } else {
+            return true;
+          }
+        };
+
         $scope.reset = function(index) {
           if ($scope.canonicalData[index]) {
             $scope.credentialsList[index].identity = $scope.canonicalData[index].identity;
@@ -113,6 +124,7 @@
             $scope.credentialsList[index].identity = '';
             $scope.credentialsList[index].secret = '';
             $scope.credentialsList[index].note = '';
+            delete $scope.credentialsList[index].removed;
           }
         };
 

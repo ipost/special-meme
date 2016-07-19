@@ -9,8 +9,7 @@ class PwApp < Sinatra::Base
 
   post '/create' do
     content_type :json
-    new_data = [].to_json
-    PasswordProtectedFile.create(file_name, password, new_data).data
+    PasswordProtectedFile.create(file_name, password, [].to_json).data
     #todo: check if create fails
   end
 
@@ -21,7 +20,8 @@ class PwApp < Sinatra::Base
   end
 
   post '/save' do
-    PasswordProtectedFile.open(file_name, password).data = data
+    content_type :json
+    PasswordProtectedFile.open(file_name, password).tap { |p| p.data = data }.data
     #todo: check if open or save fail
   end
 
