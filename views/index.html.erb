@@ -42,9 +42,7 @@
     </div>
     <script type="text/javascript">
       var app = angular.module('pw', []);
-      s = 1;
       app.controller('PwCtrl', function($scope, $http) {
-        s = $scope;
         $scope.unsavedChanges = false;
         $scope.loadData = function () {
           $scope.password = 'pass';
