@@ -8,8 +8,8 @@
   </head>
   <body ng-controller="PwCtrl">
     <div id="title">Header</div>
-    <label>Filter: <input type="text" name="filter" ng-model="filter" placeholder="filter..."></label>
-    <div ng-class="credentialsList ? '' : 'hide'" id="credentials">
+    <div ng-show="credentialsList" id="credentials">
+      <label>Filter: <input type="text" name="filter" ng-model="filter" placeholder="filter..."></label>
       <div id="column-headers">
         <div>Identity</div>
         <div>Secret</div>
@@ -28,16 +28,16 @@
       <button id="add-new-btn" ng-click="addNew()">+</a>
     </div>
     <div id="controls">
-      <div id="notification" ng-bind="unsavedChanges ? 'You have unsaved changes' : ''"></div>
+      <div id="notification" ng-show="unsavedChanges">You have unsaved changes</div>
       <div ng-show="saving">Saving</div>
-      <div ng-class="credentialsList ? 'hide' : ''">
+      <div ng-show="!credentialsList">
         <label>Username: <input type="text" name="id" ng-model="id" placeholder="identity"></label>
         <label>Password: <input type="password" name="password" ng-model="password" placeholder="master password"></label>
       </div>
       <div id="buttons">
-        <button class="main-btn" id="load-btn" ng-class="credentialsList ? 'hide' : ''" ng-click="loadData()">Load Data</button>
-        <button class="main-btn" id="create-btn" ng-class="credentialsList ? 'hide' : ''" ng-click="create()">Create</button>
-        <button class="main-btn" id="save-btn" ng-class="credentialsList ? '' : 'hide'" ng-click="save()">Save</button>
+        <button class="main-btn" id="load-btn" ng-show="!credentialsList" ng-click="loadData()">Load Data</button>
+        <button class="main-btn" id="create-btn" ng-show="!credentialsList" ng-click="create()">Create</button>
+        <button class="main-btn" id="save-btn" ng-show="credentialsList" ng-click="save()">Save</button>
       </div>
     </div>
     <script type="text/javascript">
@@ -87,7 +87,7 @@
           //todo: handle failure
         };
 
-        $scope.$watch(function(){ return $scope.credentialsList}, function(newVal, oldVal) {
+        $scope.$watch(function(){ return $scope.credentialsList }, function(newVal, oldVal) {
           if(!newVal) return;
           if(!oldVal) return;
           $scope.unsavedChanges = false;
@@ -120,12 +120,15 @@
             $scope.credentialsList[index].identity = '';
             $scope.credentialsList[index].secret = '';
             $scope.credentialsList[index].note = '';
-            delete $scope.credentialsList[index].removed;
           }
         };
 
         $scope.remove = function(index) {
-          $scope.credentialsList[index].removed = true;
+          if ($scope.canonicalData[index]) {
+            $scope.credentialsList[index].removed = true;
+          } else {
+            $scope.credentialsList = $scope.credentialsList.slice(0, index).concat($scope.credentialsList.slice(index + 1, $scope.credentialsList.length));
+          }
         };
       });
     </script>
