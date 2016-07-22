@@ -56,7 +56,7 @@ body {
 .data-field.ng-dirty {
   background-color: #DDFFDD;
 }
-#notification {
+#unsaved-changes {
   margin: 5px 0px;
 }
 #buttons {
@@ -228,4 +228,7 @@ body {
 .disabled {
   opacity: 0.2;
   cursor: default;
+}
+.hidden {
+  display: none;
 }

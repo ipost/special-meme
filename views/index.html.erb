@@ -7,7 +7,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
   </head>
   <body ng-controller="PwCtrl">
-    <div id="title">Header</div>
+    <div id="title">Password Management</div>
     <div ng-show="credentialsList" id="credentials">
       <label>Filter: <input type="text" name="filter" ng-model="filter" placeholder="filter..."></label>
       <div id="column-headers">
@@ -28,11 +28,15 @@
       <button id="add-new-btn" ng-click="addNew()">+</a>
     </div>
     <div id="controls">
-      <div id="notification" ng-show="unsavedChanges">You have unsaved changes</div>
+      <div id="unsaved-changes" ng-show="unsavedChanges">You have unsaved changes</div>
       <div ng-show="saving">Saving</div>
+      <div ng-show="notification && notification.length > 0" ng-bind="notification"/></div>
       <div ng-show="!credentialsList">
-        <label>Username: <input type="text" name="id" ng-model="id" placeholder="identity"></label>
-        <label>Password: <input type="password" name="password" ng-model="password" placeholder="master password"></label>
+        <form ng-submit="loadData()">
+          <label>Username: <input type="text" name="id" ng-model="id" placeholder="identity"></label>
+          <label>Password: <input type="password" name="password" ng-model="password" placeholder="master password"></label>
+          <input type="submit" class="hidden" />
+        </form>
       </div>
       <div id="buttons">
         <button class="main-btn" id="load-btn" ng-show="!credentialsList" ng-click="loadData()">Load Data</button>
@@ -44,26 +48,29 @@
       var app = angular.module('pw', []);
       app.controller('PwCtrl', function($scope, $http) {
         $scope.unsavedChanges = false;
+
         $scope.loadData = function () {
           $http.post('/pw/open', {
             password: $scope.password,
             id: $scope.id
-          }).success(function(data) {
-            $scope.credentialsList = data;
-            $scope.canonicalData = angular.copy($scope.credentialsList);
+          }).then(function(response) {
+            $scope.credentialsList = angular.copy(response.data);
+            $scope.canonicalData = angular.copy(response.data);
+          }, function(response) {
+            $scope.notify(response.data.error);
           });
-          //todo: handle failure
         };
 
         $scope.create = function () {
           $http.post('/pw/create', {
             password: $scope.password,
             id: $scope.id
-          }).success(function(data) {
-            $scope.credentialsList = angular.copy(data);
-            $scope.canonicalData = angular.copy(data);
+          }).then(function(response) {
+            $scope.credentialsList = angular.copy(response.data);
+            $scope.canonicalData = angular.copy(response.data);
+          }, function(response) {
+            $scope.notify(response.data.error);
           });
-          //todo: handle failure
         };
 
         $scope.addNew = function () {
@@ -77,14 +84,22 @@
             password: $scope.password,
             id: $scope.id,
             data: $scope.credentialsList.filter(function(cred) { return !cred.removed })
-          }).success(function(data) {
+          }).then(function(response) {
+            $scope.notify('Save successful');
             $scope.saving = false;
-            $scope.credentialsList = angular.copy(data);
-            $scope.canonicalData = angular.copy(data);
+            $scope.credentialsList = angular.copy(response.data);
+            $scope.canonicalData = angular.copy(response.data);
             $scope.form.$setPristine();
             $scope.unsavedChanges = false;
+          }, function(response) {
+            $scope.notify(reponse.data.error);
+            $scope.saving = false;
           });
-          //todo: handle failure
+        };
+
+        $scope.notify = function(message, duration = 3000) {
+          $scope.notification = message;
+          setTimeout(function(scope) { return function() { scope.notification = '';scope.$apply() } }($scope), duration);
         };
 
         $scope.$watch(function(){ return $scope.credentialsList }, function(newVal, oldVal) {
