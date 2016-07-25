@@ -9,7 +9,6 @@
   <body ng-controller="PwCtrl">
     <div id="title">Password Management</div>
     <div ng-show="credentialsList" id="credentials">
-      <label>Filter: <input type="text" name="filter" ng-model="filter" placeholder="filter..."></label>
       <div id="column-headers">
         <div>Identity</div>
         <div>Secret</div>
@@ -17,15 +16,17 @@
       </div>
       <form name="form" id="credentials-list">
         <div ng-show="shouldShow(creds)" ng-form="form_{{$index}}" class="credential-set" ng-repeat="creds in credentialsList">
-          <div ng-class="creds.removed ? 'removed' : ''"></div>
-          <input type="text" class="identity-field data-field" name="identity_{{$index}}" ng-model="creds.identity">
-          <input type="text" class="secret-field data-field" name="secret_{{$index}}" ng-model="creds.secret">
-          <input type="text" class="note-field data-field" name="note_{{$index}}" ng-model="creds.note">
-          <button class="remove-btn" ng-class="creds.removed ? 'disabled' : ''" ng-click="remove($index)">Remove</button>
-          <button class="undo-btn" ng-class="creds.removed || form.form_{{$index}}.$dirty ? '' : 'disabled'" ng-click="reset($index)">Undo</button>
+          <input type="text" ng-disabled="creds.removed" class="identity-field data-field" ng-model="creds.identity">
+          <input type="text" ng-disabled="creds.removed" class="secret-field data-field" ng-model="creds.secret">
+          <input type="text" ng-disabled="creds.removed" class="note-field data-field" ng-model="creds.note">
+          <button class="remove-btn" ng-disabled="creds.removed" ng-click="remove($index)">Remove</button>
+          <button class="undo-btn" ng-disabled="!creds.removed && form.form_{{$index}}.$pristine" ng-click="reset($index)">Undo</button>
         </div>
       </form>
-      <button id="add-new-btn" ng-click="addNew()">+</a>
+      <div>
+        <input id="search-box" class="data-field" type="text" name="filter" ng-model="filter" placeholder="Search...">
+        <button id="add-new-btn" ng-click="addNew()">+</a>
+      </div>
     </div>
     <div id="controls">
       <div id="unsaved-changes" ng-show="unsavedChanges">You have unsaved changes</div>
@@ -33,8 +34,8 @@
       <div ng-show="notification && notification.length > 0" ng-bind="notification"/></div>
       <div ng-show="!credentialsList">
         <form ng-submit="loadData()">
-          <label>Username: <input type="text" name="id" ng-model="id" placeholder="identity"></label>
-          <label>Password: <input type="password" name="password" ng-model="password" placeholder="master password"></label>
+          <label>Username: <input type="text" class="data-field" name="id" ng-model="id" placeholder="identity"></label>
+          <label>Password: <input type="password" class="data-field" name="password" ng-model="password" placeholder="master password"></label>
           <input type="submit" class="hidden" />
         </form>
       </div>
