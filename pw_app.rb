@@ -56,7 +56,7 @@ class PwApp < Sinatra::Base
   end
 
   def file_name
-    @file_name ||= 'data/' + Digest::MD5.hexdigest(parsed_params['id'] || '')
+    @file_name ||= 'data/' + Digest::MD5.hexdigest((parsed_params['id'] || '').downcase.strip)
   end
 
   def password
