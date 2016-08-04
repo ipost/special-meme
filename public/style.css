@@ -1,5 +1,6 @@
 body {
   font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 13.3333px;
   width: 900px;
   margin: auto;
 }
@@ -44,11 +45,12 @@ body {
 .identity-field {
   width: 180px;
   border-radius: 3px 0px 0px 3px;
+  border-right: none;
 }
 .secret-field {
   width: 180px;
   border-radius: 3px 0px 0px 3px;
-  background-color: black;
+  border-right: none;
 }
 ::selection {
   color: white;
@@ -58,8 +60,7 @@ body {
   width: 200px;
 }
 .copy-btn {
-  margin-left: -3px;
-  border-radius: 0px 3px 3px 0px;
+  border-radius: 0px 3px 3px 0px !important;
   background-color: #DDDDDD;
 }
 .copy-btn:hover {
@@ -74,6 +75,22 @@ body {
   position: relative; 
   width: 850px;
   height: 30px;
+}
+.strikethrough {
+  display: block;
+  float: left;
+  z-index: 99;
+  width: 668px;
+  height: 30px;
+  position: absolute;
+  top: 0px;
+}
+.strikethrough > div {
+  width: inherit;
+  position: absolute;
+  left: -5px;
+  top: 13px;
+  border: 1px solid #999999;
 }
 .credential-set > div > * {
   float: left;
@@ -143,10 +160,21 @@ body {
   position:relative;
   top: 1px;
 }
-.disabled:hover {}
 button[disabled], input[disabled] {
   opacity: 0.3;
   pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.disabled-span {
+  opacity: 0.3;
+  cursor: pointer;
+  color: #666666;
+  background-color: white;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;

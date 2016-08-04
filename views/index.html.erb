@@ -17,19 +17,26 @@
       </div>
       <form name="form" id="credentials-list">
         <div ng-show="shouldShow(creds)" ng-form="form_{{$index}}" class="credential-set" ng-repeat="creds in credentialsList">
+
           <div class="cell">
-            <input type="text" ng-disabled="creds.removed" class="identity-field data-field" ng-model="creds.identity">
-            <button class="copy-btn btn" data-clipboard-text="{{creds.identity}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
+            <input type="text" ng-disabled="creds.removed" class="identity-field data-field" ng-model="creds.identity" ng-show="creds.editId">
+            <span class="identity-field data-field disabled-span" ng-dblclick="editId(creds)" ng-show="!creds.editId">Double click to edit</span>
+            <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.identity}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
           </div>
+
           <div class="cell">
-            <input type="text" ng-disabled="creds.removed" class="secret-field data-field" ng-model="creds.secret">
-            <button class="copy-btn btn" data-clipboard-text="{{creds.secret}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
+            <input type="text" ng-disabled="creds.removed" class="secret-field data-field" ng-model="creds.secret" ng-show="creds.editSecret">
+            <span class="secret-field data-field disabled-span" ng-dblclick="editSecret(creds)" ng-show="!creds.editSecret">Double click to edit</span>
+            <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.secret}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
           </div>
+
           <div class="cell">
             <input type="text" ng-disabled="creds.removed" class="note-field data-field" ng-model="creds.note">
             <button class="remove-btn btn" ng-disabled="creds.removed" ng-click="remove($index)"><img class="btn-img" src="ic_delete_black_48px.svg"></button>
-            <button class="undo-btn btn" ng-disabled="!creds.removed && form.form_{{$index}}.$pristine" ng-click="reset($index)"><img class="btn-img" src="ic_undo_black_48px.svg"></button>
+            <button class="undo-btn btn" ng-disabled="!creds.removed && form.form_{{$index}}.$pristine && !creds.editId && !creds.editSecret" ng-click="reset($index)"><img class="btn-img" src="ic_undo_black_48px.svg"></button>
           </div>
+
+          <div class="strikethrough" ng-show="creds.removed"><div></div></div>
         </div>
       </form>
       <div>
@@ -55,7 +62,7 @@
       </div>
     </div>
     <script type="text/javascript">
-      new Clipboard('.copy-btn');
+      var clipboard = new Clipboard('.copy-btn');
       var app = angular.module('pw', []);
       app.controller('PwCtrl', function($scope, $http) {
         $scope.unsavedChanges = false;
@@ -85,16 +92,20 @@
         };
 
         $scope.addNew = function () {
-          $scope.credentialsList.push({identity: '', secret: '', note: ''});
+          $scope.credentialsList.push({identity: '', secret: '', note: '', editId: true, editSecret: true});
         };
 
         $scope.save = function () {
           //todo: make sure https is used
           $scope.saving = true;
+          s = $scope;
+          var toSave = $scope.credentialsList.filter(
+              function(cred) { return !cred.removed }).map(
+              function(cred) { return {identity: cred.identity, note: cred.note, secret: cred.secret} });
           $http.post('/pw/save', {
             password: $scope.password,
             id: $scope.id,
-            data: $scope.credentialsList.filter(function(cred) { return !cred.removed })
+            data: toSave
           }).then(function(response) {
             $scope.notify('Save successful');
             $scope.saving = false;
@@ -113,11 +124,15 @@
           setTimeout(function(scope) { return function() { scope.notification = '';scope.$apply() } }($scope), duration);
         };
 
+        clipboard.on('success', function(e) {
+          $scope.notify('Copied');
+        });
+
         $scope.$watch(function(){ return $scope.credentialsList }, function(newVal, oldVal) {
-          if(!newVal) return;
-          if(!oldVal) return;
+          if(!(newVal && oldVal)) return;
           $scope.unsavedChanges = false;
-          for (var i = 0; i < (newVal.length > $scope.canonicalData.length ? newVal.length : $scope.canonicalData.length); i++) {
+          var longer = newVal.length > $scope.canonicalData.length ? newVal.length : $scope.canonicalData.length;
+          for (var i = 0; i < longer; i++) {
             if (angular.equals(newVal[i], $scope.canonicalData[i])) {
               $scope.form['form_'+i].$setPristine();
             } else {
@@ -138,10 +153,7 @@
 
         $scope.reset = function(index) {
           if ($scope.canonicalData[index]) {
-            $scope.credentialsList[index].identity = $scope.canonicalData[index].identity;
-            $scope.credentialsList[index].secret = $scope.canonicalData[index].secret;
-            $scope.credentialsList[index].note = $scope.canonicalData[index].note;
-            delete $scope.credentialsList[index].removed;
+            $scope.credentialsList[index] = angular.copy($scope.canonicalData[index]);
           } else {
             $scope.credentialsList[index].identity = '';
             $scope.credentialsList[index].secret = '';
@@ -156,6 +168,10 @@
             $scope.credentialsList = $scope.credentialsList.slice(0, index).concat($scope.credentialsList.slice(index + 1, $scope.credentialsList.length));
           }
         };
+
+        $scope.editId = function(c) {c.editId = true};
+
+        $scope.editSecret = function(c) {c.editSecret = true};
       });
     </script>
   </body>
