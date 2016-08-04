@@ -19,19 +19,19 @@
         <div ng-show="shouldShow(creds)" ng-form="form_{{$index}}" class="credential-set" ng-repeat="creds in credentialsList">
 
           <div class="cell">
-            <input type="text" ng-disabled="creds.removed" class="identity-field data-field" ng-model="creds.identity" ng-show="creds.editId">
+            <input type="text" ng-disabled="creds.removed" class="identity-field data-field" ng-model="creds.identity" ng-show="creds.editId" tabindex="{{$index * 3 + 1}}">
             <span class="identity-field data-field disabled-span" ng-dblclick="editId(creds)" ng-show="!creds.editId">Double click to edit</span>
             <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.identity}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
           </div>
 
           <div class="cell">
-            <input type="text" ng-disabled="creds.removed" class="secret-field data-field" ng-model="creds.secret" ng-show="creds.editSecret">
+            <input type="text" ng-disabled="creds.removed" class="secret-field data-field" ng-model="creds.secret" ng-show="creds.editSecret" tabindex="{{$index * 3 + 2}}">
             <span class="secret-field data-field disabled-span" ng-dblclick="editSecret(creds)" ng-show="!creds.editSecret">Double click to edit</span>
             <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.secret}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
           </div>
 
           <div class="cell">
-            <input type="text" ng-disabled="creds.removed" class="note-field data-field" ng-model="creds.note">
+            <input type="text" ng-disabled="creds.removed" class="note-field data-field" ng-model="creds.note" tabindex="{{$index * 3 + 3}}">
             <button class="remove-btn btn" ng-disabled="creds.removed" ng-click="remove($index)"><img class="btn-img" src="ic_delete_black_48px.svg"></button>
             <button class="undo-btn btn" ng-disabled="!creds.removed && form.form_{{$index}}.$pristine && !creds.editId && !creds.editSecret" ng-click="reset($index)"><img class="btn-img" src="ic_undo_black_48px.svg"></button>
           </div>
