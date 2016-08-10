@@ -7,8 +7,11 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
     <script src="https://cdn.jsdelivr.net/clipboard.js/1.5.12/clipboard.min.js"></script>
   </head>
-  <body ng-controller="PwCtrl">
-    <div id="title">Password Management</div>
+  <body ng-controller="PwCtrl" ng-class="credentialsList ? 'wide' : 'narrow'">
+    <div id="top">
+      <div id="title">Password Management</div>
+      <div id="notification" ng-class="notificationType == 'success' ? 'success' : 'failure'" ng-show="notification && notification.length > 0" ng-bind="notification"/></div>
+    </div>
     <div ng-show="credentialsList" id="credentials">
       <div id="column-headers">
         <div class="cell">Identity</div>
@@ -21,13 +24,13 @@
           <div class="cell">
             <input type="text" ng-disabled="creds.removed" class="identity-field data-field" ng-model="creds.identity" ng-show="creds.editId" tabindex="{{$index * 3 + 1}}">
             <span class="identity-field data-field disabled-span" ng-dblclick="editId(creds)" ng-show="!creds.editId">Double click to edit</span>
-            <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.identity}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
+            <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.identity}}"><img class="btn-img" src="clipboard-text.svg"></button>
           </div>
 
           <div class="cell">
             <input type="text" ng-disabled="creds.removed" class="secret-field data-field" ng-model="creds.secret" ng-show="creds.editSecret" tabindex="{{$index * 3 + 2}}">
             <span class="secret-field data-field disabled-span" ng-dblclick="editSecret(creds)" ng-show="!creds.editSecret">Double click to edit</span>
-            <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.secret}}"><img class="btn-img" src="ic_content_copy_black_48px.svg"></button>
+            <button class="copy-btn btn" ng-disabled="creds.removed" data-clipboard-text="{{creds.secret}}"><img class="btn-img" src="clipboard-text.svg"></button>
           </div>
 
           <div class="cell">
@@ -45,18 +48,16 @@
       </div>
     </div>
     <div id="controls">
-      <div id="unsaved-changes" ng-show="unsavedChanges">You have unsaved changes</div>
-      <div ng-show="saving">Saving</div>
-      <div ng-show="notification && notification.length > 0" ng-bind="notification"/></div>
+      <div id="saveStatus" ng-show="credentialsList">{{ saving ? 'Saving...' : unsavedChanges ? 'You have unsaved changes' : '&nbsp;' }}</div>
       <div ng-show="!credentialsList">
         <form ng-submit="loadData()">
-          <label>Username: <input type="text" class="data-field" name="id" ng-model="id" placeholder="identity"></label>
+          <label>Username: <input type="text" class="data-field" name="id" ng-model="id" placeholder="username"></label>
           <label>Password: <input type="password" class="data-field" name="password" ng-model="password" placeholder="master password"></label>
           <input type="submit" class="hidden" />
         </form>
       </div>
       <div id="buttons">
-        <button class="main-btn" id="load-btn" ng-show="!credentialsList" ng-click="loadData()">Load Data</button>
+        <button class="main-btn" id="load-btn" ng-show="!credentialsList" ng-click="loadData()">Load</button>
         <button class="main-btn" id="create-btn" ng-show="!credentialsList" ng-click="create()">Create</button>
         <button class="main-btn" id="save-btn" ng-disabled="!unsavedChanges" ng-show="credentialsList" ng-click="save()">Save</button>
       </div>
@@ -75,7 +76,7 @@
             $scope.credentialsList = angular.copy(response.data);
             $scope.canonicalData = angular.copy(response.data);
           }, function(response) {
-            $scope.notify(response.data.error);
+            $scope.notifyFailure('Invalid identity/password combination');
           });
         };
 
@@ -87,7 +88,7 @@
             $scope.credentialsList = angular.copy(response.data);
             $scope.canonicalData = angular.copy(response.data);
           }, function(response) {
-            $scope.notify(response.data.error);
+            $scope.notifyFailure(response.data.error);
           });
         };
 
@@ -107,25 +108,50 @@
             id: $scope.id,
             data: toSave
           }).then(function(response) {
-            $scope.notify('Save successful');
+            $scope.notifySuccess('Save successful');
             $scope.saving = false;
             $scope.credentialsList = angular.copy(response.data);
             $scope.canonicalData = angular.copy(response.data);
             $scope.form.$setPristine();
             $scope.unsavedChanges = false;
           }, function(response) {
-            $scope.notify(reponse.data.error);
+            $scope.notifyFailure(reponse.data.error);
             $scope.saving = false;
           });
         };
 
         $scope.notify = function(message, duration = 3000) {
           $scope.notification = message;
-          setTimeout(function(scope) { return function() { scope.notification = '';scope.$apply() } }($scope), duration);
+          setTimeout(function(scope) {
+            return function() {
+              scope.notification = '';
+              scope.$apply()
+            }
+          }($scope), duration);
+        };
+
+        $scope.notifySuccess = function(message, duration = 3000) {
+          $scope.notificationType = 'success';
+          $scope.notify(message, duration);
+        };
+
+        $scope.notifyFailure = function(message, duration = 3000) {
+          $scope.notificationType = 'failure';
+          $scope.notify(message, duration);
+        };
+
+        $scope.notify = function(message, duration) {
+          $scope.notification = message;
+          setTimeout(function(scope) {
+            return function() {
+              scope.notification = '';
+              scope.$apply()
+            }
+          }($scope), duration);
         };
 
         clipboard.on('success', function(e) {
-          $scope.notify('Copied');
+          $scope.notifySuccess('Copied', 1500);
         });
 
         $scope.$watch(function(){ return $scope.credentialsList }, function(newVal, oldVal) {

@@ -1,12 +1,38 @@
 body {
   font-family: "Helvetica Neue", "Arial", sans-serif;
   font-size: 13.3333px;
-  width: 900px;
   margin: auto;
+}
+.narrow {
+  width: 500px;
+}
+.wide {
+  width: 900px;
+}
+#top {
+  margin-top: 5px;
 }
 #title {
   font-size: 140%;
   margin-bottom: 10px;
+  display: inline-block;
+}
+#notification {
+  color: white;
+  float: right;
+  padding: 7px;
+  margin: 0px 0px;
+  border-width: 0px;
+  border-style: solid;
+  border-radius: 5px;
+}
+.failure {
+  border-color: #FF0000;
+  background-color: #FF6666;
+}
+.success {
+  border-color: #00FF00;
+  background-color: #66FF66;
 }
 #credentials {
   min-height: 2em;
@@ -98,8 +124,11 @@ body {
 .credential-set .data-field.ng-dirty {
   background-color: #FFFFAA;
 }
-#unsaved-changes {
+#saveStatus{
   margin: 5px 0px;
+}
+#controls {
+  width: 500px;
 }
 #search-box {
   float: right;
