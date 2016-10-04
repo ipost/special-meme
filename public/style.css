@@ -54,6 +54,7 @@ body {
   border-radius: 3px;
   border: 1px solid #AAAAAA;
   padding: 5px;
+  height: 15px;
 }
 .cell {
   height: 100%;
@@ -183,6 +184,7 @@ body {
   border: none;
   border-radius: 3px;
   height: 27px;
+  width: 27px;
   padding: 3px;
 }
 .btn:active {

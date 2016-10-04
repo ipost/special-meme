@@ -99,7 +99,6 @@
         $scope.save = function () {
           //todo: make sure https is used
           $scope.saving = true;
-          s = $scope;
           var toSave = $scope.credentialsList.filter(
               function(cred) { return !cred.removed }).map(
               function(cred) { return {identity: cred.identity, note: cred.note, secret: cred.secret} });
@@ -138,16 +137,6 @@
         $scope.notifyFailure = function(message, duration = 3000) {
           $scope.notificationType = 'failure';
           $scope.notify(message, duration);
-        };
-
-        $scope.notify = function(message, duration) {
-          $scope.notification = message;
-          setTimeout(function(scope) {
-            return function() {
-              scope.notification = '';
-              scope.$apply()
-            }
-          }($scope), duration);
         };
 
         clipboard.on('success', function(e) {
